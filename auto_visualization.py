@@ -158,7 +158,7 @@ class Game:
         self.HEIGHT = int(input('H: '))
         self.SPEED = int(input('Speed (1-10): '))
         self.disp_costs = False#True if input('Show costs(y/n)?').lower() == 'y' else False
-        self.screen = pg.display.set_mode((self.WIDTH*32, self.HEIGHT*32))
+        self.screen = pg.display.set_mode((self.WIDTH*32, self.HEIGHT*32), pg.NOFRAME)
         self.running = True
         self.clock = pg.time.Clock()
 

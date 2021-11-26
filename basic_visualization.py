@@ -4,7 +4,7 @@ import time
 
 '''
 A program to visualize how A* pathfinding works
-You wannt to click on the block with the smallest number
+You want to click on the block with the smallest number
 until you eventually reach the end block
 
 To place the starting node and ending node, left click
@@ -55,7 +55,8 @@ class Node(pg.sprite.Sprite):
         return cls.all_nodes[str(pos)] if str(pos) in cls.all_nodes else False
     
     def clicked(self, setup=False):
-        if pg.mouse.get_pressed()[0] and self.rect.collidepoint(pg.mouse.get_pos()):
+        if pg.mouse.get_pressed()[0] and \
+           self.rect.collidepoint(pg.mouse.get_pos()):
             if Node.click_counter == 0:
                 self.set_start()
             elif Node.click_counter == 1:
@@ -63,7 +64,8 @@ class Node(pg.sprite.Sprite):
             else:
                 self.scan()
             Node.click_counter+=1
-        elif pg.mouse.get_pressed()[2] and self.rect.collidepoint(pg.mouse.get_pos()):
+        elif pg.mouse.get_pressed()[2] and \
+             self.rect.collidepoint(pg.mouse.get_pos()):
             self.kill_node()
 
     def kill_node(self):
@@ -84,13 +86,15 @@ class Node(pg.sprite.Sprite):
         self.end = True
         self.hCost = 0
         Node.end_node = self
-        Node.start_node.hCost = hypot(Node.start_node.x-self.x, Node.start_node.y-self.y)
+        Node.start_node.hCost = hypot(Node.start_node.x-self.x, \
+                                      Node.start_node.y-self.y)
         Node.start_node.fCost = Node.start_node.gCost + Node.start_node.hCost
         time.sleep(.2)
         
     def scan(self):
 
-        if not self.discovered and not self.start and not (self.end and Node.seen_end):
+        if not self.discovered and not self.start and not\
+           (self.end and Node.seen_end):
             return
 
         if self.end:
@@ -154,13 +158,49 @@ class Game:
     start_node = None
     end_node = None
     running = True
+    map_sizes = {
+                    'map1':{
+                        'size': [401, 201],
+                        'recommended_node_size': 4,
+                        },
+                    'map2':{
+                        'size':[100,50],
+                        'recommended_node_size': 4,
+                        },
+                    'map3':{
+                        'size':[235,53],
+                        'recommended_node_size': 4,
+                        },
+                    2:{
+                        'size': [18, 18],
+                        'recommended_node_size': 10,
+                        },
+                    'example':{
+                        'size': [10, 5],
+                        'recommended_node_size': 10,
+                    },
+                    'inefficiencyExample':{
+                        'size': [20,20],
+                        'recommended_node_size': 10,
+                    }
+                }
 
     def __init__(self):
         pg.init()
         self.WIDTH = int(input('W: '))
         self.HEIGHT = int(input('H: '))
-        self.disp_costs = True if input('Show g and h costs(y/n)?').lower() == 'y' else False
-        self.screen = pg.display.set_mode((self.WIDTH*32, self.HEIGHT*32))
+
+        # Uncomment the 3 following lines for map generation
+        #self.map = 3
+        
+        #self.WIDTH, self.HEIGHT = Game.map_sizes[self.map]['size']
+        self.NODE_SIZE = 10#Game.map_sizes[self.map]['recommended_node_size']
+
+        # You don't need this line for Greedy
+        self.disp_costs = True if input('Show g and h costs(y/n)?').lower() == \
+                          'y' else False
+        self.screen = pg.display.set_mode((self.WIDTH*32, self.HEIGHT*32),\
+                                          pg.NOFRAME)
         self.running = True
         self.clock = pg.time.Clock()
 
@@ -173,6 +213,24 @@ class Game:
             for col in range(self.HEIGHT):
                 Node([row,col], self)
 
+        # Uncomment for map generation
+        '''
+        with open(f'mazes\{self.map}.txt', 'r') as f:
+            x=0
+            for line in f:
+                y=0
+                for char in line:
+                    if char == '*':
+                        Node.all_nodes[f"[{y}, {x}]"].kill_node()
+                    elif char == 'a':
+                        Node.all_nodes[f"[{y}, {x}]"].set_start()
+                    elif char == 'b':
+                        end_node_loc = [y, y]
+                    y+=1
+                x+=1
+            Node.all_nodes[str(end_node_loc)].set_end()
+        '''
+        
         self.run()
 
     def run(self):
@@ -203,10 +261,16 @@ class Game:
         self.all_sprites.draw(self.screen)
         for node in Node.all_nodes.values():
             if node and node.discovered:
+                # !DELETE all 3 lines below for Greedy 
                 if self.disp_costs:
-                    self.draw_text(str(int(node.gCost*10)), 15, (0, 0, 0), node.rect.x+7, node.rect.y+5)
-                    self.draw_text(str(int(node.hCost*10)), 15, (0, 0, 0), node.rect.x+node.size-7, node.rect.y+5)
-                self.draw_text(str(int(node.fCost*10)), 20, (0, 0, 0), node.rect.x+node.size/2, node.rect.y+node.size/2) 
+                    self.draw_text(str(int(node.gCost*10)), \
+                                   15, (0, 0, 0), node.rect.x+7, node.rect.y+5)
+                    self.draw_text(str(int(node.hCost*10)), \
+                                   15, (0, 0, 0), node.rect.x+node.size-7, \
+                                   node.rect.y+5)
+                self.draw_text(str(int(node.fCost*10)), \
+                               20, (0, 0, 0), node.rect.x+node.size/2, \
+                               node.rect.y+node.size/2) 
         pg.display.flip()
 
     def draw_text(self, text, size, color , x, y, font_name = ''):

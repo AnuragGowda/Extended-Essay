@@ -2,14 +2,6 @@ import pygame as pg
 from math import hypot
 from time import time
 
-'''
-A program to visualize how A* pathfinding works
-
-To place the starting node and ending node, left click
-To place walls/obstacles, right click
-To restart press the r key
-To start press the s key
-'''
 class Node:
     all_nodes = {}
     init_counter = 0
@@ -48,12 +40,14 @@ class Node:
         self.end = True
         self.hCost = 0
         Node.end_node = self
-        Node.start_node.hCost = hypot(Node.start_node.x-self.x, Node.start_node.y-self.y)
+        Node.start_node.hCost = hypot(Node.start_node.x-self.x, \
+                                      Node.start_node.y-self.y)
         Node.start_node.fCost = Node.start_node.gCost + Node.start_node.hCost
         
     def scan(self):
 
-        if not self.discovered and not self.start and not (self.end and Node.seen_end):
+        if not self.discovered and not self.start and not \
+           (self.end and Node.seen_end):
             return
 
         if self.end:
@@ -63,25 +57,6 @@ class Node:
         if not self.start and not self.end:
             self.seen = True
  
-
-        '''
-
-
-
-
-
-
-
-        I'm going to turn off diagonal movement for this one cause it looks weird on out.txt lol
-
-
-
-
-
-        Below (this is the edited part)         |
-                                               ...
-                                                .
-        '''
         # Generate a list of surrounding nodes to update
         check = []
         for x in range(-1,2):
@@ -139,31 +114,36 @@ class Node:
 start_node = None
 end_node = None
 running = True
-map = 1
 max_x = 0
 max_y = 0
 map_sizes = {
-                    1:[401, 201],
-                    2:[18, 18],
-                } 
+    'map1':[401, 201],
+    'map2':[100,50],
+    'map3':[235,53],
+    2:[18, 18],
+    'example':[10, 5],
+    'inefficiencyExample':[20,20],
+}
+mapOption = 'inefficiencyExample'
+
 def main():
 
-    for row in range(map_sizes[map][0]):
-        for col in range(map_sizes[map][1]):
+    for row in range(map_sizes[mapOption][0]):
+        for col in range(map_sizes[mapOption][1]):
             Node([row,col])
 
     # Restart stuff here
-    with open(f'mazes\\{map}.txt', 'r') as f:
+    with open(f'mazes\\{mapOption}.txt', 'r') as f:
         x=0
         for line in f:
             y=0
             for char in line:
                 if char == '*':
-                    Node.all_nodes[f"[{x}, {y}]"].kill_node()
-                elif char == 'o':
-                    Node.all_nodes[f"[{x}, {y}]"].set_start()
-                elif char == 'e':
-                    end_node_loc = [x, y]
+                    Node.all_nodes[f"[{y}, {x}]"].kill_node()
+                elif char == 'a':
+                    Node.all_nodes[f"[{y}, {x}]"].set_start()
+                elif char == 'b':
+                    end_node_loc = [y, x]
                 y+=1
                 global max_y
                 max_y = max(max_y, y)
@@ -190,15 +170,17 @@ def show():
     s = ''
     with open('out.txt', 'w') as f:
         for x in range(max_x):
-            for y in range(max_y):
-                if Node.exists([x,y]) and Node.all_nodes[f"[{x}, {y}]"].final:
-                    s+='.'
-                elif Node.exists([x,y]) and Node.all_nodes[f"[{x}, {y}]"].start:
-                    s+='A'
-                elif Node.exists([x,y]) and Node.all_nodes[f"[{x}, {y}]"].end:
-                    s+='B'
-                else:
+            for y in range(max_y-1):
+                if Node.exists([y,x]) and Node.all_nodes[f"[{y}, {x}]"].final:
                     s+='#'
+                elif Node.exists([y,x]) and Node.all_nodes[f"[{y}, {x}]"].start:
+                    s+='A'
+                elif Node.exists([y,x]) and Node.all_nodes[f"[{y}, {x}]"].end:
+                    s+='B'
+                elif Node.exists([y,x]):
+                    s+='.'
+                else:
+                    s+='*'
             s+='\n'
         f.write(s)
 
