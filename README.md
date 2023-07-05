@@ -1,4 +1,8 @@
 # A-Star
+
+PDF is in code above.
+
+
 This is my implementation of the A* algorithm (visualizations were written in pygame).
 
 The basic visualization is where the user clicks the lowest cost node until they reach the end node.
